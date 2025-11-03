@@ -1,0 +1,58 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Exception: Allow embedded OM CLI binaries
+!embed/bin/*.exe
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Go workspace file
+go.work
+
+# Wails build output
+build/bin/
+build/darwin/
+build/windows/
+build/linux/
+
+# Frontend dependencies
+frontend/node_modules/
+frontend/dist/
+frontend/.svelte-kit/
+frontend/package-lock.json
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Application data
+*.db
+*.sqlite
+*.log
+
+# Environment variables
+.env
+.env.local
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# OM CLI binaries (downloaded during build)
+embed/bin/

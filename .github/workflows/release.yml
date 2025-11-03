@@ -1,0 +1,211 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., v1.0.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          # macOS builds
+          - name: macOS-Intel
+            os: macos-latest
+            platform: darwin/amd64
+            output_name: tanzu-downloader-macos-intel
+            artifact_path: build/bin/tanzu-downloader.app
+
+          - name: macOS-ARM
+            os: macos-latest
+            platform: darwin/arm64
+            output_name: tanzu-downloader-macos-arm64
+            artifact_path: build/bin/tanzu-downloader.app
+
+          # Windows build
+          - name: Windows-x64
+            os: windows-latest
+            platform: windows/amd64
+            output_name: tanzu-downloader-windows-x64
+            artifact_path: build/bin/tanzu-downloader.exe
+
+          # Linux build
+          - name: Linux-x64
+            os: ubuntu-latest
+            platform: linux/amd64
+            output_name: tanzu-downloader-linux-x64
+            artifact_path: build/bin/tanzu-downloader
+
+    runs-on: ${{ matrix.os }}
+    name: Build ${{ matrix.name }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Wails (Linux)
+        if: runner.os == 'Linux'
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+
+      - name: Install Wails (macOS)
+        if: runner.os == 'macOS'
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+
+      - name: Install Wails (Windows)
+        if: runner.os == 'Windows'
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev
+
+      - name: Download OM CLI binaries
+        shell: bash
+        run: |
+          chmod +x download-om-binaries.sh
+          ./download-om-binaries.sh
+
+      - name: Build application
+        shell: bash
+        run: |
+          export PATH=$PATH:$(go env GOPATH)/bin
+          if [ "${{ runner.os }}" == "Linux" ]; then
+            wails build -platform ${{ matrix.platform }} -clean -tags webkit2_41
+          else
+            wails build -platform ${{ matrix.platform }} -clean
+          fi
+
+      - name: Package macOS App
+        if: runner.os == 'macOS'
+        run: |
+          cd build/bin
+          zip -r ${{ matrix.output_name }}.zip tanzu-downloader.app
+          mv ${{ matrix.output_name }}.zip ../../
+
+      - name: Package Windows App
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          cd build/bin
+          7z a ../../${{ matrix.output_name }}.zip tanzu-downloader.exe
+
+      - name: Package Linux App
+        if: runner.os == 'Linux'
+        run: |
+          cd build/bin
+          tar -czf ../../${{ matrix.output_name }}.tar.gz tanzu-downloader
+
+      - name: Upload artifact (macOS/Windows)
+        if: runner.os == 'macOS' || runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.output_name }}
+          path: ${{ matrix.output_name }}.zip
+          retention-days: 5
+
+      - name: Upload artifact (Linux)
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.output_name }}
+          path: ${{ matrix.output_name }}.tar.gz
+          retention-days: 5
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    name: Create Release
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Display structure of downloaded files
+        run: ls -R artifacts
+
+      - name: Get version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "VERSION=${{ inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.version.outputs.VERSION }}
+          name: Release ${{ steps.version.outputs.VERSION }}
+          draft: false
+          prerelease: false
+          body: |
+            ## Tanzu Download Manager ${{ steps.version.outputs.VERSION }}
+
+            ### Downloads
+
+            Choose the appropriate binary for your platform:
+
+            - **macOS Intel (x64)**: `tanzu-downloader-macos-intel.zip`
+            - **macOS Apple Silicon (ARM64)**: `tanzu-downloader-macos-arm64.zip`
+            - **Windows x64**: `tanzu-downloader-windows-x64.zip`
+            - **Linux x64**: `tanzu-downloader-linux-x64.tar.gz`
+
+            ### Installation
+
+            1. Download the appropriate file for your platform
+            2. Extract the archive
+            3. Run the application (no additional dependencies required!)
+
+            ### What's Included
+
+            - ✅ Fully portable single binary
+            - ✅ Embedded OM CLI (no separate installation needed)
+            - ✅ All dependencies bundled
+
+            ### Requirements
+
+            - Broadcom Support Portal API Token
+
+            ### Notes
+
+            - **macOS**: On first run, you may need to right-click and select "Open" to bypass Gatekeeper
+            - **Linux**: Make the binary executable: `chmod +x tanzu-downloader`
+
+            ---
+
+            🤖 Built with [Wails](https://wails.io/) and [Go](https://golang.org/)
+          files: |
+            artifacts/tanzu-downloader-macos-intel/tanzu-downloader-macos-intel.zip
+            artifacts/tanzu-downloader-macos-arm64/tanzu-downloader-macos-arm64.zip
+            artifacts/tanzu-downloader-windows-x64/tanzu-downloader-windows-x64.zip
+            artifacts/tanzu-downloader-linux-x64/tanzu-downloader-linux-x64.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
