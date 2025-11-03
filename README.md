@@ -1,6 +1,6 @@
-# Tanzu Download Manager
+# Tile Downloader
 
-A desktop application for downloading VMware Tanzu products from the Broadcom Support Portal (formerly Tanzu Network).
+A desktop application for downloading Tanzu software from the Broadcom Support Portal (formerly Tanzu Network).
 
 ![App Screenshot](./app.png)
 
