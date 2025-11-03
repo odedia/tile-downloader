@@ -2,6 +2,8 @@
 
 A desktop application for downloading VMware Tanzu products from the Broadcom Support Portal (formerly Tanzu Network).
 
+![App Screenshot](./app.png)
+
 ## ⚠️ Disclaimer
 
 This is a community project and is NOT affiliated with, endorsed by, or supported by Broadcom or VMware Tanzu. This software is provided as-is with no warranty or official support of any kind. Use at your own risk.
