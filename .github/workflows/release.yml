@@ -23,28 +23,28 @@ jobs:
           - name: macOS-Intel
             os: macos-latest
             platform: darwin/amd64
-            output_name: tanzu-downloader-macos-intel
-            artifact_path: build/bin/tanzu-downloader.app
+            output_name: tile-downloader-macos-intel
+            artifact_path: build/bin/tile-downloader.app
 
           - name: macOS-ARM
             os: macos-latest
             platform: darwin/arm64
-            output_name: tanzu-downloader-macos-arm64
-            artifact_path: build/bin/tanzu-downloader.app
+            output_name: tile-downloader-macos-arm64
+            artifact_path: build/bin/tile-downloader.app
 
           # Windows build
           - name: Windows-x64
             os: windows-latest
             platform: windows/amd64
-            output_name: tanzu-downloader-windows-x64
-            artifact_path: build/bin/tanzu-downloader.exe
+            output_name: tile-downloader-windows-x64
+            artifact_path: build/bin/tile-downloader.exe
 
           # Linux build
           - name: Linux-x64
             os: ubuntu-latest
             platform: linux/amd64
-            output_name: tanzu-downloader-linux-x64
-            artifact_path: build/bin/tanzu-downloader
+            output_name: tile-downloader-linux-x64
+            artifact_path: build/bin/tile-downloader
 
     runs-on: ${{ matrix.os }}
     name: Build ${{ matrix.name }}
@@ -101,7 +101,7 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           cd build/bin
-          zip -r ${{ matrix.output_name }}.zip tanzu-downloader.app
+          zip -r ${{ matrix.output_name }}.zip tile-downloader.app
           mv ${{ matrix.output_name }}.zip ../../
 
       - name: Package Windows App
@@ -109,13 +109,13 @@ jobs:
         shell: bash
         run: |
           cd build/bin
-          7z a ../../${{ matrix.output_name }}.zip tanzu-downloader.exe
+          7z a ../../${{ matrix.output_name }}.zip tile-downloader.exe
 
       - name: Package Linux App
         if: runner.os == 'Linux'
         run: |
           cd build/bin
-          tar -czf ../../${{ matrix.output_name }}.tar.gz tanzu-downloader
+          tar -czf ../../${{ matrix.output_name }}.tar.gz tile-downloader
 
       - name: Upload artifact (macOS/Windows)
         if: runner.os == 'macOS' || runner.os == 'Windows'
@@ -173,10 +173,10 @@ jobs:
 
             Choose the appropriate binary for your platform:
 
-            - **macOS Intel (x64)**: `tanzu-downloader-macos-intel.zip`
-            - **macOS Apple Silicon (ARM64)**: `tanzu-downloader-macos-arm64.zip`
-            - **Windows x64**: `tanzu-downloader-windows-x64.zip`
-            - **Linux x64**: `tanzu-downloader-linux-x64.tar.gz`
+            - **macOS Intel (x64)**: `tile-downloader-macos-intel.zip`
+            - **macOS Apple Silicon (ARM64)**: `tile-downloader-macos-arm64.zip`
+            - **Windows x64**: `tile-downloader-windows-x64.zip`
+            - **Linux x64**: `tile-downloader-linux-x64.tar.gz`
 
             ### Installation
 
@@ -197,15 +197,15 @@ jobs:
             ### Notes
 
             - **macOS**: On first run, you may need to right-click and select "Open" to bypass Gatekeeper
-            - **Linux**: Make the binary executable: `chmod +x tanzu-downloader`
+            - **Linux**: Make the binary executable: `chmod +x tile-downloader`
 
             ---
 
             🤖 Built with [Wails](https://wails.io/) and [Go](https://golang.org/)
           files: |
-            artifacts/tanzu-downloader-macos-intel/tanzu-downloader-macos-intel.zip
-            artifacts/tanzu-downloader-macos-arm64/tanzu-downloader-macos-arm64.zip
-            artifacts/tanzu-downloader-windows-x64/tanzu-downloader-windows-x64.zip
-            artifacts/tanzu-downloader-linux-x64/tanzu-downloader-linux-x64.tar.gz
+            artifacts/tile-downloader-macos-intel/tile-downloader-macos-intel.zip
+            artifacts/tile-downloader-macos-arm64/tile-downloader-macos-arm64.zip
+            artifacts/tile-downloader-windows-x64/tile-downloader-windows-x64.zip
+            artifacts/tile-downloader-linux-x64/tile-downloader-linux-x64.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

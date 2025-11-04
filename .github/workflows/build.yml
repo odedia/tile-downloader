@@ -66,18 +66,18 @@ jobs:
       - name: Verify build output (macOS)
         if: runner.os == 'macOS'
         run: |
-          ls -lh build/bin/tanzu-downloader.app/Contents/MacOS/tanzu-downloader
+          ls -lh build/bin/tile-downloader.app/Contents/MacOS/tile-downloader
           echo "✓ macOS build successful"
 
       - name: Verify build output (Windows)
         if: runner.os == 'Windows'
         shell: bash
         run: |
-          ls -lh build/bin/tanzu-downloader.exe
+          ls -lh build/bin/tile-downloader.exe
           echo "✓ Windows build successful"
 
       - name: Verify build output (Linux)
         if: runner.os == 'Linux'
         run: |
-          ls -lh build/bin/tanzu-downloader
+          ls -lh build/bin/tile-downloader
           echo "✓ Linux build successful"
