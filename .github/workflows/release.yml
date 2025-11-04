@@ -167,7 +167,7 @@ jobs:
           draft: false
           prerelease: false
           body: |
-            ## Tanzu Download Manager ${{ steps.version.outputs.VERSION }}
+            ## Tile Downloader ${{ steps.version.outputs.VERSION }}
 
             ### Downloads
 

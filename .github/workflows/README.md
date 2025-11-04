@@ -1,6 +1,6 @@
 # GitHub Actions Workflows
 
-This directory contains GitHub Actions workflows for building and releasing the Tanzu Download Manager.
+This directory contains GitHub Actions workflows for building and releasing the Tile Downloader.
 
 ## Workflows
 

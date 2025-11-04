@@ -1,6 +1,6 @@
 # Tile Downloader
 
-A desktop application for downloading Tanzu software from the Broadcom Support Portal (formerly Tanzu Network).
+A desktop application for downloading Tanzu software from Broadcom Support Portal (formerly Tanzu Network).
 
 ![App Screenshot](./app.png)
 
@@ -10,7 +10,7 @@ This is a community project and is NOT affiliated with, endorsed by, or supporte
 
 ## Features
 
-- **Browse Tanzu Products**: View all available VMware Tanzu products and releases
+- **Browse Tanzu Downloads**: View all available VMware Tanzu products and releases
 - **Smart Filtering**: Filter products to show only Tanzu Platform downloads
 - **Product Sorting**: Automatically prioritizes key products like Foundation Core and Elastic Application Runtime
 - **File Categorization**: Automatically identifies and categorizes Tiles, Stemcells, and Ops Manager files
@@ -36,29 +36,30 @@ This is a community project and is NOT affiliated with, endorsed by, or supporte
 ## Prerequisites
 
 For end users:
-- **Broadcom Support Portal API Token** (only requirement!)
+- **Broadcom Support Portal API Token** (only requirement for downloading files!)
+- **Huggingface CLI installed** (for packaging AI models for offline use)
 
 For developers:
 - [Go](https://golang.org/dl/) 1.18 or later
 - [Node.js](https://nodejs.org/) 16 or later
 - [Wails](https://wails.io/) v2 framework
 
-**Note**: The OM CLI is bundled inside the application - no separate installation needed!
+**Note**: The OM CLI is bundled inside the application - no separate installation needed.
 
 ## Installation
 
 ### From Binary Release
 
-1. Download the latest release for your platform from the [Releases page](https://github.com/odedia/tanzu-downloader/releases)
+1. Download the latest release for your platform from the [Releases page](https://github.com/odedia/tile-downloader/releases)
 2. Extract the archive
-3. Run the application (no additional dependencies required!)
+3. Run the application
 
 ### From Source
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/odedia/tanzu-downloader.git
-cd tanzu-downloader
+git clone https://github.com/odedia/tile-downloader.git
+cd tile-downloader
 ```
 
 2. Install Wails:
@@ -108,7 +109,7 @@ wails dev
 2. Log in with your credentials
 3. Navigate to your profile settings
 4. Generate an API token
-5. Copy the token and paste it into the Tanzu Download Manager settings
+5. Copy the token and paste it into the Tile Downloader settings
 
 ## Usage
 
@@ -141,7 +142,7 @@ Settings are stored locally and include:
 ## Project Structure
 
 ```
-tanzu-downloader/
+tile-downloader/
 ├── main.go                    # Application entry point
 ├── broadcom.go                # Broadcom API service
 ├── omcli.go                   # OM CLI embedding logic
@@ -223,4 +224,4 @@ Apache License 2.0 - see LICENSE file for details
 
 ## Support
 
-For issues, questions, or contributions, please visit the [GitHub repository](https://github.com/odedia/tanzu-downloader).
+For issues, questions, or contributions, please visit the [GitHub repository](https://github.com/odedia/tile-downloader).

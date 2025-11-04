@@ -105,27 +105,27 @@
     </div>
   {/if}
 
-  <div class="download-form">
-    <div class="form-section">
-      <h3>Model Type</h3>
-      <div class="radio-group">
-        <label class="radio-option">
-          <input type="radio" bind:group={modelType} value="vllm" />
-          <div class="radio-content">
-            <strong>vLLM</strong>
-            <span>Downloads safetensors, JSON, and jinja files, then packages as tar.gz</span>
-          </div>
-        </label>
-        <label class="radio-option">
-          <input type="radio" bind:group={modelType} value="ollama" />
-          <div class="radio-content">
-            <strong>Ollama</strong>
-            <span>Downloads GGUF files from specified directory</span>
-          </div>
-        </label>
-      </div>
+  <div class="form-section model-type-section">
+    <h3>Model Type</h3>
+    <div class="radio-group">
+      <label class="radio-option">
+        <input type="radio" bind:group={modelType} value="vllm" />
+        <div class="radio-content">
+          <strong>vLLM</strong>
+          <span>Downloads safetensors, JSON, and jinja files, then packages as tar.gz</span>
+        </div>
+      </label>
+      <label class="radio-option">
+        <input type="radio" bind:group={modelType} value="ollama" />
+        <div class="radio-content">
+          <strong>Ollama</strong>
+          <span>Downloads GGUF files and concatenates to a single file</span>
+        </div>
+      </label>
     </div>
+  </div>
 
+  <div class="download-form">
     <div class="form-section">
       <h3>Model Details</h3>
       <div class="form-group">
@@ -257,8 +257,8 @@
         <h4>Ollama Models (GGUF)</h4>
         <p>For quantized models in GGUF format:</p>
         <ul>
-          <li>Downloads .gguf files from specified directory</li>
-          <li>Use the full tree path to the GGUF files</li>
+          <li>Downloads .gguf files from huggingface</li>
+          <li>Concatenates to a single GGUF</li>
         </ul>
         <p>Example:</p>
         <code>https://huggingface.co/unsloth/Llama-3.3-70B-Instruct-GGUF/tree/main/UD-Q6_K_XL</code>
@@ -279,7 +279,7 @@
 
   .header {
     margin-bottom: 2rem;
-    text-align: center;
+    text-align: left;
   }
 
   .header h2 {
@@ -292,6 +292,20 @@
     margin: 0.5rem 0 0 0;
     color: #4a5568;
     font-size: 1rem;
+  }
+
+  .model-type-section {
+    background-color: #f7fafc;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .model-type-section h3 {
+    text-align: left;
+    margin: 0 0 1rem 0;
+    color: #2d3748;
+    font-size: 1.25rem;
   }
 
   .error {
@@ -381,15 +395,18 @@
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
+    text-align: left;
   }
 
   .radio-content strong {
     color: #2d3748;
+    text-align: left;
   }
 
   .radio-content span {
     color: #718096;
     font-size: 0.875rem;
+    text-align: left;
   }
 
   .form-group {

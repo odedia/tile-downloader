@@ -20,7 +20,7 @@ func main() {
 
 	// Create application with options
 	err := wails.Run(&options.App{
-		Title:  "Tanzu Download Manager",
+		Title:  "Tile Downloader",
 		Width:  1200,
 		Height: 800,
 		AssetServer: &assetserver.Options{

@@ -3,7 +3,7 @@
   import { SetAPIToken, GetAPIToken, ListProducts, GetProductReleases, GetReleaseFiles, GetReleaseEULA, AcceptEULAAndDownload, GetDownloadLocation, SetDownloadLocation, CancelDownload, GetReleaseDependencySpecifiers, GetReleaseDependencies } from '../wailsjs/go/main/BroadcomService.js';
   import { EventsOn } from '../wailsjs/runtime/runtime.js';
   import { BrowserOpenURL } from '../wailsjs/runtime/runtime.js';
-  import tanzuLogo from './assets/images/tanzu-logo.png';
+  import tanzuLogo from './assets/images/tile-logo.png';
   import AIModelPackager from './components/AIModelPackager.svelte';
 
   let apiToken = '';
@@ -357,7 +357,7 @@
   }
 
   function openGitHub() {
-    BrowserOpenURL('https://github.com/odedia/tanzu-downloader');
+    BrowserOpenURL('https://github.com/odedia/tile-downloader');
   }
 
   function openSettings() {
@@ -1272,7 +1272,7 @@
   <header>
     <div class="header-title">
       <img src={tanzuLogo} alt="VMware Tanzu" class="tanzu-logo" />
-      <h1>Tanzu Download Manager</h1>
+      <h1>Tile Downloader</h1>
     </div>
     {#if tokenSaved}
       <div class="header-buttons">
