@@ -16,6 +16,10 @@ export function GetAPIToken():Promise<string>;
 
 export function GetDownloadLocation():Promise<string>;
 
+export function GetHTTPProxy():Promise<string>;
+
+export function GetHTTPSProxy():Promise<string>;
+
 export function GetProductReleases(arg1:string):Promise<Array<main.Release>>;
 
 export function GetReleaseDependencies(arg1:string,arg2:number):Promise<Array<main.Dependency>>;
@@ -31,3 +35,7 @@ export function ListProducts():Promise<Array<main.Product>>;
 export function SetAPIToken(arg1:string):Promise<void>;
 
 export function SetDownloadLocation(arg1:string):Promise<void>;
+
+export function SetHTTPProxy(arg1:string):Promise<void>;
+
+export function SetHTTPSProxy(arg1:string):Promise<void>;

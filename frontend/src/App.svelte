@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte';
-  import { SetAPIToken, GetAPIToken, ListProducts, GetProductReleases, GetReleaseFiles, GetReleaseEULA, AcceptEULAAndDownload, GetDownloadLocation, SetDownloadLocation, CancelDownload, GetReleaseDependencySpecifiers, GetReleaseDependencies } from '../wailsjs/go/main/BroadcomService.js';
+  import { SetAPIToken, GetAPIToken, ListProducts, GetProductReleases, GetReleaseFiles, GetReleaseEULA, AcceptEULAAndDownload, GetDownloadLocation, SetDownloadLocation, CancelDownload, GetReleaseDependencySpecifiers, GetReleaseDependencies, GetHTTPProxy, SetHTTPProxy, GetHTTPSProxy, SetHTTPSProxy } from '../wailsjs/go/main/BroadcomService.js';
   import { EventsOn } from '../wailsjs/runtime/runtime.js';
   import { BrowserOpenURL } from '../wailsjs/runtime/runtime.js';
   import tanzuLogo from './assets/images/tile-logo.png';
@@ -25,6 +25,10 @@
   let downloadLocation = '';
   let tempDownloadLocation = '';
   let tempApiToken = '';
+  let httpProxy = '';
+  let httpsProxy = '';
+  let tempHttpProxy = '';
+  let tempHttpsProxy = '';
   let onlyTanzuPlatform = true; // Default to true - only show Tanzu Platform downloads
   let cancelledDownloads = new Set(); // Track cancelled downloads to ignore late progress events
   let downloadQueue = []; // Queue of pending downloads
@@ -64,6 +68,21 @@
       tempDownloadLocation = downloadLocation;
     } catch (e) {
       console.log('Could not load download location');
+    }
+
+    // Load proxy settings
+    try {
+      httpProxy = await GetHTTPProxy();
+      tempHttpProxy = httpProxy;
+    } catch (e) {
+      console.log('Could not load HTTP proxy');
+    }
+
+    try {
+      httpsProxy = await GetHTTPSProxy();
+      tempHttpsProxy = httpsProxy;
+    } catch (e) {
+      console.log('Could not load HTTPS proxy');
     }
 
     // Check if token is already set
@@ -363,6 +382,8 @@
   function openSettings() {
     tempDownloadLocation = downloadLocation;
     tempApiToken = apiToken;
+    tempHttpProxy = httpProxy;
+    tempHttpsProxy = httpsProxy;
     currentView = 'settings';
   }
 
@@ -379,6 +400,14 @@
 
       await SetDownloadLocation(tempDownloadLocation);
       downloadLocation = tempDownloadLocation;
+
+      // Save proxy settings
+      await SetHTTPProxy(tempHttpProxy);
+      httpProxy = tempHttpProxy;
+
+      await SetHTTPSProxy(tempHttpsProxy);
+      httpsProxy = tempHttpsProxy;
+
       currentView = 'products';
     } catch (e) {
       error = 'Failed to save settings: ' + e.toString();
@@ -390,6 +419,8 @@
   function cancelSettings() {
     tempDownloadLocation = downloadLocation;
     tempApiToken = apiToken;
+    tempHttpProxy = httpProxy;
+    tempHttpsProxy = httpsProxy;
     currentView = 'products';
   }
 
@@ -1664,6 +1695,34 @@
           />
         </div>
         <p class="settings-note">Current location: <code>{downloadLocation}</code></p>
+      </div>
+
+      <div class="settings-section">
+        <h3>HTTP Proxy</h3>
+        <p class="settings-description">Proxy server for HTTP requests (optional)</p>
+        <div class="setting-input">
+          <input
+            type="text"
+            bind:value={tempHttpProxy}
+            placeholder="e.g., http://proxy.example.com:8080"
+            disabled={loading}
+          />
+        </div>
+        <p class="settings-note">Leave empty to disable HTTP proxy</p>
+      </div>
+
+      <div class="settings-section">
+        <h3>HTTPS Proxy</h3>
+        <p class="settings-description">Proxy server for HTTPS requests (optional)</p>
+        <div class="setting-input">
+          <input
+            type="text"
+            bind:value={tempHttpsProxy}
+            placeholder="e.g., https://proxy.example.com:8443"
+            disabled={loading}
+          />
+        </div>
+        <p class="settings-note">Leave empty to disable HTTPS proxy</p>
       </div>
 
       <div class="settings-section">

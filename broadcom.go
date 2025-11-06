@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -109,6 +110,8 @@ func (b *BroadcomService) getConfigPath() (string, error) {
 type Config struct {
 	APIToken         string `json:"api_token"`
 	DownloadLocation string `json:"download_location"`
+	HTTPProxy        string `json:"http_proxy,omitempty"`
+	HTTPSProxy       string `json:"https_proxy,omitempty"`
 }
 
 // loadConfig loads the configuration from disk
@@ -225,6 +228,103 @@ func (b *BroadcomService) SetDownloadLocation(location string) error {
 	return b.saveConfig(config)
 }
 
+// GetHTTPProxy returns the configured HTTP proxy
+func (b *BroadcomService) GetHTTPProxy() (string, error) {
+	config, err := b.loadConfig()
+	if err != nil {
+		return "", err
+	}
+	return config.HTTPProxy, nil
+}
+
+// SetHTTPProxy sets the HTTP proxy
+func (b *BroadcomService) SetHTTPProxy(proxy string) error {
+	config, err := b.loadConfig()
+	if err != nil {
+		config = b.getDefaultConfig()
+	}
+
+	config.HTTPProxy = proxy
+	return b.saveConfig(config)
+}
+
+// GetHTTPSProxy returns the configured HTTPS proxy
+func (b *BroadcomService) GetHTTPSProxy() (string, error) {
+	config, err := b.loadConfig()
+	if err != nil {
+		return "", err
+	}
+	return config.HTTPSProxy, nil
+}
+
+// SetHTTPSProxy sets the HTTPS proxy
+func (b *BroadcomService) SetHTTPSProxy(proxy string) error {
+	config, err := b.loadConfig()
+	if err != nil {
+		config = b.getDefaultConfig()
+	}
+
+	config.HTTPSProxy = proxy
+	return b.saveConfig(config)
+}
+
+// createHTTPClient creates an HTTP client with proxy configuration if set
+func (b *BroadcomService) createHTTPClient() (*http.Client, error) {
+	config, err := b.loadConfig()
+	if err != nil {
+		// Return default client if config can't be loaded
+		return &http.Client{}, nil
+	}
+
+	// If no proxy is configured, return default client
+	if config.HTTPProxy == "" && config.HTTPSProxy == "" {
+		return &http.Client{}, nil
+	}
+
+	// Create a custom transport with proxy settings
+	transport := &http.Transport{
+		Proxy: func(req *http.Request) (*url.URL, error) {
+			var proxyURLStr string
+			if req.URL.Scheme == "https" && config.HTTPSProxy != "" {
+				proxyURLStr = config.HTTPSProxy
+			} else if req.URL.Scheme == "http" && config.HTTPProxy != "" {
+				proxyURLStr = config.HTTPProxy
+			}
+
+			if proxyURLStr == "" {
+				return nil, nil
+			}
+
+			return url.Parse(proxyURLStr)
+		},
+	}
+
+	return &http.Client{Transport: transport}, nil
+}
+
+// setProxyEnv sets proxy environment variables for a command
+func (b *BroadcomService) setProxyEnv(cmd *exec.Cmd) error {
+	config, err := b.loadConfig()
+	if err != nil {
+		return nil // Not a fatal error
+	}
+
+	// Get existing environment variables
+	cmd.Env = os.Environ()
+
+	// Add proxy settings if configured
+	if config.HTTPProxy != "" {
+		cmd.Env = append(cmd.Env, "HTTP_PROXY="+config.HTTPProxy)
+		cmd.Env = append(cmd.Env, "http_proxy="+config.HTTPProxy)
+	}
+	if config.HTTPSProxy != "" {
+		cmd.Env = append(cmd.Env, "HTTPS_PROXY="+config.HTTPSProxy)
+		cmd.Env = append(cmd.Env, "https_proxy="+config.HTTPSProxy)
+	}
+
+	return nil
+}
+
 // CancelDownload cancels an active download by killing the process
 func (b *BroadcomService) CancelDownload(fileID int) error {
 	b.downloadsMutex.Lock()
@@ -265,7 +365,10 @@ func (b *BroadcomService) ListProducts() ([]Product, error) {
 	req.Header.Set("Authorization", "Bearer "+b.apiToken)
 	req.Header.Set("Accept", "application/json")
 
-	client := &http.Client{}
+	client, err := b.createHTTPClient()
+	if err != nil {
+		return nil, err
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
@@ -303,7 +406,10 @@ func (b *BroadcomService) GetProductReleases(productSlug string) ([]Release, err
 	req.Header.Set("Authorization", "Bearer "+b.apiToken)
 	req.Header.Set("Accept", "application/json")
 
-	client := &http.Client{}
+	client, err := b.createHTTPClient()
+	if err != nil {
+		return nil, err
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
@@ -341,7 +447,10 @@ func (b *BroadcomService) GetReleaseEULA(productSlug string, releaseID int) (*EU
 	req.Header.Set("Authorization", "Bearer "+b.apiToken)
 	req.Header.Set("Accept", "application/json")
 
-	client := &http.Client{}
+	client, err := b.createHTTPClient()
+	if err != nil {
+		return nil, err
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
@@ -379,7 +488,10 @@ func (b *BroadcomService) GetReleaseFiles(productSlug string, releaseID int) ([]
 	req.Header.Set("Authorization", "Bearer "+b.apiToken)
 	req.Header.Set("Accept", "application/json")
 
-	client := &http.Client{}
+	client, err := b.createHTTPClient()
+	if err != nil {
+		return nil, err
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
@@ -450,6 +562,9 @@ func (b *BroadcomService) DownloadStemcellWithOM(productSlug string, releaseVers
 		"-f", fileGlob,
 		"-o", outputDir,
 	)
+
+	// Set proxy environment variables if configured
+	b.setProxyEnv(cmd)
 
 	// Create pipes for stdout and stderr
 	stdout, err := cmd.StdoutPipe()
@@ -628,6 +743,9 @@ func (b *BroadcomService) DownloadOpsManagerWithOM(productSlug string, releaseVe
 		"-o", outputDir,
 	)
 
+	// Set proxy environment variables if configured
+	b.setProxyEnv(cmd)
+
 	// Create pipes for stdout and stderr
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -803,6 +921,9 @@ func (b *BroadcomService) DownloadFileWithOM(productSlug string, releaseVersion 
 		"-o", outputDir,
 	)
 
+	// Set proxy environment variables if configured
+	b.setProxyEnv(cmd)
+
 	// Create pipes for stdout and stderr
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -947,7 +1068,10 @@ func (b *BroadcomService) GetReleaseDependencies(productSlug string, releaseID i
 	req.Header.Set("Authorization", "Bearer "+b.apiToken)
 	req.Header.Set("Accept", "application/json")
 
-	client := &http.Client{}
+	client, err := b.createHTTPClient()
+	if err != nil {
+		return nil, err
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
@@ -985,7 +1109,10 @@ func (b *BroadcomService) GetReleaseDependencySpecifiers(productSlug string, rel
 	req.Header.Set("Authorization", "Bearer "+b.apiToken)
 	req.Header.Set("Accept", "application/json")
 
-	client := &http.Client{}
+	client, err := b.createHTTPClient()
+	if err != nil {
+		return nil, err
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err

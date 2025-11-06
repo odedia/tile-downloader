@@ -30,6 +30,14 @@ export function GetDownloadLocation() {
   return window['go']['main']['BroadcomService']['GetDownloadLocation']();
 }
 
+export function GetHTTPProxy() {
+  return window['go']['main']['BroadcomService']['GetHTTPProxy']();
+}
+
+export function GetHTTPSProxy() {
+  return window['go']['main']['BroadcomService']['GetHTTPSProxy']();
+}
+
 export function GetProductReleases(arg1) {
   return window['go']['main']['BroadcomService']['GetProductReleases'](arg1);
 }
@@ -60,4 +68,12 @@ export function SetAPIToken(arg1) {
 
 export function SetDownloadLocation(arg1) {
   return window['go']['main']['BroadcomService']['SetDownloadLocation'](arg1);
+}
+
+export function SetHTTPProxy(arg1) {
+  return window['go']['main']['BroadcomService']['SetHTTPProxy'](arg1);
+}
+
+export function SetHTTPSProxy(arg1) {
+  return window['go']['main']['BroadcomService']['SetHTTPSProxy'](arg1);
 }
