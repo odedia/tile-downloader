@@ -39,12 +39,20 @@ jobs:
             output_name: tile-downloader-windows-x64
             artifact_path: build/bin/tile-downloader.exe
 
-          # Linux build
+          # Linux builds
           - name: Linux-x64
             os: ubuntu-latest
             platform: linux/amd64
             output_name: tile-downloader-linux-x64
             artifact_path: build/bin/tile-downloader
+            webkit_version: "4.1"
+
+          - name: Linux-x64-RHEL9
+            os: ubuntu-latest
+            platform: linux/amd64
+            output_name: tile-downloader-linux-x64-rhel9
+            artifact_path: build/bin/tile-downloader
+            webkit_version: "4.0"
 
     runs-on: ${{ matrix.os }}
     name: Build ${{ matrix.name }}
@@ -79,7 +87,11 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev
+          if [ "${{ matrix.webkit_version }}" == "4.0" ]; then
+            sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev
+          else
+            sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev
+          fi
 
       - name: Download OM CLI binaries
         shell: bash
@@ -92,7 +104,11 @@ jobs:
         run: |
           export PATH=$PATH:$(go env GOPATH)/bin
           if [ "${{ runner.os }}" == "Linux" ]; then
-            wails build -platform ${{ matrix.platform }} -clean -tags webkit2_41
+            if [ "${{ matrix.webkit_version }}" == "4.0" ]; then
+              wails build -platform ${{ matrix.platform }} -clean
+            else
+              wails build -platform ${{ matrix.platform }} -clean -tags webkit2_41
+            fi
           else
             wails build -platform ${{ matrix.platform }} -clean
           fi
@@ -176,7 +192,8 @@ jobs:
             - **macOS Intel (x64)**: `tile-downloader-macos-intel.zip`
             - **macOS Apple Silicon (ARM64)**: `tile-downloader-macos-arm64.zip`
             - **Windows x64**: `tile-downloader-windows-x64.zip`
-            - **Linux x64**: `tile-downloader-linux-x64.tar.gz`
+            - **Linux x64** (Ubuntu/Debian/Fedora): `tile-downloader-linux-x64.tar.gz`
+            - **Linux x64 RHEL9** (RHEL 9/CentOS 9/Rocky 9): `tile-downloader-linux-x64-rhel9.tar.gz`
 
             ### Installation
 
@@ -198,6 +215,9 @@ jobs:
 
             - **macOS**: On first run, you may need to right-click and select "Open" to bypass Gatekeeper
             - **Linux**: Make the binary executable: `chmod +x tile-downloader`
+            - **Linux**: Requires WebKit2GTK installed:
+              - Ubuntu/Debian/Fedora: `sudo apt install libwebkit2gtk-4.1-0` or `sudo dnf install webkit2gtk4.1`
+              - RHEL 9/CentOS 9/Rocky 9: Use the RHEL9 build, requires `webkit2gtk3` (`sudo dnf install webkit2gtk3`)
 
             ---
 
@@ -207,5 +227,6 @@ jobs:
             artifacts/tile-downloader-macos-arm64/tile-downloader-macos-arm64.zip
             artifacts/tile-downloader-windows-x64/tile-downloader-windows-x64.zip
             artifacts/tile-downloader-linux-x64/tile-downloader-linux-x64.tar.gz
+            artifacts/tile-downloader-linux-x64-rhel9/tile-downloader-linux-x64-rhel9.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

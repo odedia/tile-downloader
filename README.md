@@ -36,8 +36,9 @@ This is a community project and is NOT affiliated with, endorsed by, or supporte
 ## Prerequisites
 
 For end users:
-- **Broadcom Support Portal API Token** (only requirement for downloading files!)
+- **Broadcom Support Portal API Token** (required for downloading files)
 - **Huggingface CLI installed** (for packaging AI models for offline use)
+- **Linux only**: WebKit2GTK 4.1 runtime library (see installation instructions below)
 
 For developers:
 - [Go](https://golang.org/dl/) 1.18 or later
@@ -52,7 +53,18 @@ For developers:
 
 1. Download the latest release for your platform from the [Releases page](https://github.com/odedia/tile-downloader/releases)
 2. Extract the archive
-3. Run the application
+3. **Linux only**: Install WebKit2GTK if not already present:
+   ```bash
+   # Ubuntu/Debian
+   sudo apt install libwebkit2gtk-4.1-0
+   
+   # RHEL/CentOS/Fedora
+   sudo dnf install webkit2gtk4.1
+   
+   # Arch Linux
+   sudo pacman -S webkit2gtk-4.1
+   ```
+4. Run the application
 
 ### From Source
 
@@ -163,10 +175,12 @@ tile-downloader/
 
 This application embeds the OM CLI for all supported platforms, providing a truly portable single-binary experience. On first run, the appropriate OM CLI binary is extracted to a temporary directory and used for all downloads. This means:
 
-- ✅ No external dependencies required
+- ✅ No OM CLI installation required - it's bundled in the app
 - ✅ Works offline (after initial setup)
 - ✅ Consistent experience across all platforms
 - ✅ Automatic platform detection (macOS Intel/ARM, Linux, Windows)
+
+> **Note**: Linux requires WebKit2GTK 4.1 as a system dependency (see Prerequisites section).
 
 The OM CLI is licensed under Apache 2.0 and bundled in compliance with its license terms.
 
@@ -191,10 +205,11 @@ git push origin v1.0.0
 ### Available Platforms
 
 Releases are automatically built for:
-- **macOS Intel (x64)** - `tanzu-downloader-macos-intel.zip`
-- **macOS Apple Silicon (ARM64)** - `tanzu-downloader-macos-arm64.zip`
-- **Windows x64** - `tanzu-downloader-windows-x64.zip`
-- **Linux x64** - `tanzu-downloader-linux-x64.tar.gz`
+- **macOS Intel (x64)** - `tile-downloader-macos-intel.zip`
+- **macOS Apple Silicon (ARM64)** - `tile-downloader-macos-arm64.zip`
+- **Windows x64** - `tile-downloader-windows-x64.zip`
+- **Linux x64** (Ubuntu/Debian/Fedora) - `tile-downloader-linux-x64.tar.gz`
+- **Linux x64 RHEL9** (RHEL 9/CentOS 9/Rocky 9) - `tile-downloader-linux-x64-rhel9.tar.gz`
 
 See [.github/workflows/README.md](.github/workflows/README.md) for detailed workflow documentation.
 

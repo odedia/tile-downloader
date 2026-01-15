@@ -20,6 +20,12 @@ jobs:
           - name: Linux
             os: ubuntu-latest
             platform: linux/amd64
+            webkit_version: "4.1"
+
+          - name: Linux-RHEL9
+            os: ubuntu-latest
+            platform: linux/amd64
+            webkit_version: "4.0"
 
     runs-on: ${{ matrix.os }}
     name: Build Test - ${{ matrix.name }}
@@ -45,7 +51,11 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev
+          if [ "${{ matrix.webkit_version }}" == "4.0" ]; then
+            sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev
+          else
+            sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev
+          fi
 
       - name: Download OM CLI binaries
         shell: bash
@@ -58,7 +68,11 @@ jobs:
         run: |
           export PATH=$PATH:$(go env GOPATH)/bin
           if [ "${{ runner.os }}" == "Linux" ]; then
-            wails build -platform ${{ matrix.platform }} -clean -tags webkit2_41
+            if [ "${{ matrix.webkit_version }}" == "4.0" ]; then
+              wails build -platform ${{ matrix.platform }} -clean
+            else
+              wails build -platform ${{ matrix.platform }} -clean -tags webkit2_41
+            fi
           else
             wails build -platform ${{ matrix.platform }} -clean
           fi
