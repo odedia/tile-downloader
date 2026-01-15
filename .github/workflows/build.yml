@@ -23,7 +23,7 @@ jobs:
             webkit_version: "4.1"
 
           - name: Linux-RHEL9
-            os: ubuntu-latest
+            os: ubuntu-20.04
             platform: linux/amd64
             webkit_version: "4.0"
 

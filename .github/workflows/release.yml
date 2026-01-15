@@ -48,7 +48,7 @@ jobs:
             webkit_version: "4.1"
 
           - name: Linux-x64-RHEL9
-            os: ubuntu-latest
+            os: ubuntu-20.04
             platform: linux/amd64
             output_name: tile-downloader-linux-x64-rhel9
             artifact_path: build/bin/tile-downloader
